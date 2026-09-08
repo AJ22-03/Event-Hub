@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - EventHub</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <div class="dashboard-wrapper">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <i class="fa-solid fa-tent"></i> EventHub
+      </div>
+      <div class="sidebar-user" id="sidebar-user-info">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="sidebar-nav" id="sidebar-nav">
+        <!-- Rendered by JS based on role -->
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="dashboard-main">
+      <header class="dashboard-topbar">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <button class="hamburger" id="sidebar-toggle" style="display:block; background:none; border:none; color:var(--text-primary);">
+            <i class="fa-solid fa-bars" style="font-size:1.2rem;"></i>
+          </button>
+          <h2 id="page-title">Dashboard</h2>
+        </div>
+        <div class="topbar-right">
+          <a href="index.html" class="btn btn-outline-sm"><i class="fa-solid fa-globe"></i> View Site</a>
+        </div>
+      </header>
+
+      <div class="dashboard-content">
+        <!-- ============================== -->
+        <!-- USER SECTIONS                  -->
+        <!-- ============================== -->
+        <div id="sec-user-home" class="dashboard-section">
+          <div class="welcome-banner" id="user-welcome"></div>
+          <div class="grid-3 mb-6">
+            <div class="stat-card">
+              <div class="stat-icon" style="color:var(--primary-light);"><i class="fa-solid fa-ticket"></i></div>
+              <div class="stat-info"><div class="value" id="u-stat-regs">0</div><div class="label">My Registrations</div></div>
+            </div>
+            <div class="stat-card" style="cursor:pointer;" onclick="window.location.href='events.html'">
+              <div class="stat-icon" style="color:var(--info); background:rgba(14,165,233,0.15);"><i class="fa-solid fa-calendar-check"></i></div>
+              <div class="stat-info"><div class="value" style="font-size:1.2rem; margin-top:8px;">Browse Events</div></div>
+            </div>
+          </div>
+          <div class="card" style="padding:24px;">
+            <h3 style="margin-bottom:20px;">Recent Registrations</h3>
+            <div class="table-wrapper"><table id="u-recent-regs-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-user-registrations" class="dashboard-section">
+          <div class="card" style="padding:24px;">
+            <div class="table-wrapper"><table id="u-regs-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-user-notifications" class="dashboard-section">
+          <div class="flex-between mb-4">
+            <h3>Notifications</h3>
+            <button class="btn btn-outline-sm" onclick="EventHub.markAllNotificationsRead(currentUser.id); loadDashboardData();">Mark all read</button>
+          </div>
+          <div id="notif-list"></div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- ORGANIZER SECTIONS             -->
+        <!-- ============================== -->
+        <div id="sec-organizer-home" class="dashboard-section">
+          <div class="welcome-banner" id="org-welcome"></div>
+          <div class="grid-4 mb-6" id="org-stats"></div>
+          <div class="card" style="padding:24px;">
+            <div class="flex-between mb-4">
+              <h3 style="margin:0;">My Events</h3>
+              <button class="btn btn-primary-sm" onclick="navTo('organizer-create-event')">Create New</button>
+            </div>
+            <div class="table-wrapper"><table id="o-events-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-organizer-create-event" class="dashboard-section">
+          <div class="card" style="padding:28px; max-width:800px; margin:0 auto;">
+            <form id="form-create-event" onsubmit="handleCreateEvent(event)">
+              <h3 class="mb-6">Basic Information</h3>
+              <div class="form-row">
+                <div class="form-group"><label>Event Title</label><input type="text" id="ce-title" class="form-control" required></div>
+                <div class="form-group">
+                  <label>Category</label>
+                  <select id="ce-cat" class="form-control" required>
+                    <option value="Music">Music</option><option value="Tech">Tech</option><option value="Sports">Sports</option><option value="Food">Food</option><option value="Art">Art</option><option value="Business">Business</option><option value="Education">Education</option><option value="Health">Health</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>Description</label><textarea id="ce-desc" class="form-control" required></textarea></div>
+              
+              <h3 class="mt-6 mb-6">Schedule & Location</h3>
+              <div class="form-row">
+                <div class="form-group"><label>Date</label><input type="date" id="ce-date" class="form-control" required></div>
+                <div class="form-group"><label>Start Time</label><input type="time" id="ce-time" class="form-control" required></div>
+                <div class="form-group"><label>End Time</label><input type="time" id="ce-endtime" class="form-control" required></div>
+                <div class="form-group"><label>City / Region</label><input type="text" id="ce-loc" class="form-control" required></div>
+              </div>
+              <div class="form-group"><label>Venue Name</label><input type="text" id="ce-venue" class="form-control" required></div>
+              
+              <div class="form-row">
+                <div class="form-group"><label>Latitude</label><input type="number" step="any" id="ce-lat" class="form-control" required></div>
+                <div class="form-group"><label>Longitude</label><input type="number" step="any" id="ce-lng" class="form-control" required></div>
+              </div>
+              <button type="button" class="btn btn-outline-sm mb-6" onclick="openMapModal()">Pick on Map</button>
+
+              <h3 class="mb-6">Capacity & Pricing</h3>
+              <div class="form-row">
+                <div class="form-group"><label>Total Seats</label><input type="number" id="ce-seats" class="form-control" min="1" required></div>
+                <div class="form-group"><label>Registration Fee (₹) <span class="text-muted">(0 for Free)</span></label><input type="number" id="ce-fee" class="form-control" min="0" required></div>
+              </div>
+
+              <div class="divider"></div>
+              <button type="submit" class="btn btn-primary" id="btn-submit-event">Submit for Approval</button>
+            </form>
+          </div>
+        </div>
+
+        <div id="sec-organizer-payments" class="dashboard-section">
+          <div class="card" style="padding:24px;">
+            <div class="table-wrapper"><table id="o-payments-table"></table></div>
+          </div>
+        </div>
+
+        <!-- ============================== -->
+        <!-- ADMIN SECTIONS                 -->
+        <!-- ============================== -->
+        <div id="sec-admin-home" class="dashboard-section">
+          <div class="welcome-banner" id="admin-welcome"></div>
+          <div class="grid-4 mb-6" id="a-stats"></div>
+        </div>
+
+        <div id="sec-admin-approve" class="dashboard-section">
+          <div class="card" style="padding:24px;">
+            <div class="filter-tabs" id="a-approve-tabs">
+              <button class="filter-tab active" onclick="loadAdminApprovals('all')">All</button>
+              <button class="filter-tab" onclick="loadAdminApprovals('pending')">Pending</button>
+              <button class="filter-tab" onclick="loadAdminApprovals('approved')">Approved</button>
+            </div>
+            <div class="table-wrapper"><table id="a-approve-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-admin-users" class="dashboard-section">
+          <div class="card" style="padding:24px;">
+            <div class="table-wrapper"><table id="a-users-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-admin-registrations" class="dashboard-section">
+          <div class="card" style="padding:24px;">
+            <div class="table-wrapper"><table id="a-regs-table"></table></div>
+          </div>
+        </div>
+
+        <div id="sec-admin-reports" class="dashboard-section">
+          <div class="grid-2 mb-6">
+            <div class="card" style="padding:24px;">
+              <h3 class="mb-4">Events by Category</h3>
+              <canvas id="chart-events"></canvas>
+            </div>
+            <div class="card" style="padding:24px;">
+              <h3 class="mb-4">Platform Stats</h3>
+              <div id="report-stats-html"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Map Modal -->
+  <div id="mapModal" class="modal-overlay" style="display:none;">
+    <div class="modal" style="max-width:600px; width:95%;">
+      <h3 style="margin-top:0;">Pick Location</h3>
+      <p class="text-muted mb-4">Click on the map to set the exact venue location.</p>
+      <div id="create-map-modal" style="height:350px; margin-bottom:20px;"></div>
+      <div class="flex-between">
+        <div style="font-size:0.85rem;" id="map-coords-display">Lat: -, Lng: -</div>
+        <button class="btn btn-primary" onclick="closeMapModal()">Confirm Location</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+  <script>
+    const currentUser = EventHub.requireAuth();
+    let currentSection = '';
+    let mapPicker = null;
+    let mapMarker = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!currentUser) return;
+      initSidebar();
+      
+      const roleHome = currentUser.role + '-home';
+      navTo(window.location.hash ? window.location.hash.substring(1) : roleHome);
+      
+      document.getElementById('sidebar-toggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('open');
+      });
+    });
+
+    function initSidebar() {
+      const uInfo = document.getElementById('sidebar-user-info');
+      uInfo.innerHTML = `
+        <div class="sidebar-avatar">${currentUser.name.charAt(0)}</div>
+        <div>
+          <div class="sidebar-username">${currentUser.name}</div>
+          <div class="sidebar-role">${currentUser.role.toUpperCase()}</div>
+        </div>
+      `;
+
+      const nav = document.getElementById('sidebar-nav');
+      let links = [];
+      if (currentUser.role === 'user') {
+        links = [
+          {id:'user-home', icon:'fa-house', label:'Dashboard'},
+          {id:'user-registrations', icon:'fa-ticket', label:'My Tickets'},
+          {id:'user-notifications', icon:'fa-bell', label:'Notifications'}
+        ];
+      } else if (currentUser.role === 'organizer') {
+        links = [
+          {id:'organizer-home', icon:'fa-house', label:'Dashboard'},
+          {id:'organizer-events', icon:'fa-list', label:'My Events'},
+          {id:'organizer-create-event', icon:'fa-plus', label:'Create Event'},
+          {id:'organizer-payments', icon:'fa-credit-card', label:'Payments'},
+          {id:'user-notifications', icon:'fa-bell', label:'Notifications'}
+        ];
+      } else if (currentUser.role === 'admin') {
+        links = [
+          {id:'admin-home', icon:'fa-house', label:'Dashboard'},
+          {id:'admin-approve', icon:'fa-check-to-slot', label:'Approvals'},
+          {id:'admin-users', icon:'fa-users', label:'Manage Users'},
+          {id:'admin-registrations', icon:'fa-clipboard-list', label:'Registrations'},
+          {id:'admin-reports', icon:'fa-chart-pie', label:'Reports'},
+          {id:'user-notifications', icon:'fa-bell', label:'Notifications'}
+        ];
+      }
+
+      let html = '';
+      links.forEach(l => {
+        html += `<div class="sidebar-nav-item" id="nav-${l.id}" onclick="navTo('${l.id}')"><i class="fa-solid ${l.icon}"></i> ${l.label}</div>`;
+      });
+      html += `<div class="sidebar-nav-item logout" onclick="EventHub.logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</div>`;
+      nav.innerHTML = html;
+    }
+
+    function navTo(secId) {
+      // Validate
+      if (!document.getElementById('sec-'+secId)) secId = currentUser.role + '-home';
+      
+      currentSection = secId;
+      window.location.hash = secId;
+      
+      // Update sidebar UI
+      document.querySelectorAll('.sidebar-nav-item').forEach(el => el.classList.remove('active'));
+      const activeNav = document.getElementById('nav-'+secId);
+      if (activeNav) activeNav.classList.add('active');
+      if (window.innerWidth <= 768) document.getElementById('sidebar').classList.remove('open');
+      
+      // Update Content UI
+      document.querySelectorAll('.dashboard-section').forEach(el => el.classList.remove('active'));
+      document.getElementById('sec-'+secId).classList.add('active');
+      
+      const titles = {
+        'user-home':'Dashboard', 'user-registrations':'My Tickets', 'user-notifications':'Notifications',
+        'organizer-home':'Dashboard', 'organizer-events':'My Events', 'organizer-create-event':'Create Event', 'organizer-payments':'Payment Verification',
+        'admin-home':'Dashboard', 'admin-approve':'Event Approvals', 'admin-users':'Manage Users', 'admin-registrations':'All Registrations', 'admin-reports':'Reports & Analytics'
+      };
+      document.getElementById('page-title').innerText = titles[secId] || 'Dashboard';
+      
+      loadDashboardData();
+    }
+
+    function loadDashboardData() {
+      if (currentSection === 'user-home') {
+        document.getElementById('user-welcome').innerHTML = `<h2>Welcome back, ${currentUser.name}!</h2><p>Here is an overview of your activities.</p>`;
+        const regs = EventHub.getUserRegistrations(currentUser.id);
+        document.getElementById('u-stat-regs').innerText = regs.length;
+        
+        // table
+        let html = `<thead><tr><th>Event</th><th>Date</th><th>Status</th></tr></thead><tbody>`;
+        regs.slice(0,3).forEach(r => {
+          html += `<tr>
+            <td><strong>${r.event?.title}</strong></td>
+            <td>${EventHub.formatDate(r.event?.date)}</td>
+            <td><span class="badge ${r.status==='cancelled'?'badge-secondary':'badge-success'}">${r.status}</span></td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('u-recent-regs-table').innerHTML = regs.length ? html : `<tr><td colspan="3" class="text-center text-muted">No registrations yet.</td></tr>`;
+      }
+      else if (currentSection === 'user-registrations') {
+        const regs = EventHub.getUserRegistrations(currentUser.id);
+        let html = `<thead><tr><th>Registration ID</th><th>Event</th><th>Date</th><th>Fee</th><th>Payment Status</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+        regs.forEach(r => {
+          let pBadge = `<span class="badge badge-warning">Pending</span>`;
+          if (r.paymentStatus === 'verified') pBadge = `<span class="badge badge-success">Verified</span>`;
+          else if (r.paymentStatus === 'free') pBadge = `<span class="badge badge-info">Free</span>`;
+          else if (r.paymentStatus === 'rejected') pBadge = `<span class="badge badge-danger">Rejected</span>`;
+
+          html += `<tr>
+            <td><small class="text-muted">${r.id}</small></td>
+            <td><strong>${r.event?.title}</strong><br><small class="text-muted">${r.event?.venue}</small></td>
+            <td>${EventHub.formatDate(r.event?.date)}</td>
+            <td>${EventHub.formatCurrency(r.event?.fee)}</td>
+            <td>${pBadge}</td>
+            <td><span class="badge ${r.status==='cancelled'?'badge-secondary':'badge-success'}">${r.status.toUpperCase()}</span></td>
+            <td>
+              <button class="btn btn-outline-sm" onclick="window.location.href='event-detail.html?id=${r.eventId}'">View</button>
+              ${r.status!=='cancelled' && new Date(r.event?.date) > new Date() ? `<button class="btn btn-outline-sm" style="color:var(--error);" onclick="EventHub.cancelRegistration('${r.id}'); loadDashboardData();">Cancel</button>` : ''}
+            </td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('u-regs-table').innerHTML = regs.length ? html : `<tr><td colspan="7" class="text-center text-muted">No registrations found.</td></tr>`;
+      }
+      else if (currentSection === 'user-notifications') {
+        const notifs = EventHub.getUserNotifications(currentUser.id);
+        let html = '';
+        notifs.forEach(n => {
+          html += `
+            <div class="notif-item ${!n.read ? 'unread' : ''}">
+              <div class="notif-icon" style="background:var(--dark);"><i class="fa-solid fa-bell" style="color:var(--${n.type==='success'?'success':(n.type==='warning'?'warning':'primary')})"></i></div>
+              <div class="notif-body">
+                <div class="notif-msg">${n.message}</div>
+                <div class="notif-time">${EventHub.timeAgo(n.createdAt)}</div>
+              </div>
+              ${!n.read ? `<button class="btn btn-outline-sm" onclick="EventHub.markNotificationRead('${n.id}'); loadDashboardData();">Mark Read</button>` : ''}
+            </div>
+          `;
+        });
+        document.getElementById('notif-list').innerHTML = notifs.length ? html : '<p class="text-muted">No notifications.</p>';
+      }
+      else if (currentSection === 'organizer-home') {
+        document.getElementById('org-welcome').innerHTML = `<h2>Organizer Dashboard</h2><p>Manage your events and track registrations.</p>`;
+        const events = EventHub.getEvents().filter(e => e.organizerId === currentUser.id);
+        let totalRegs = 0;
+        events.forEach(e => totalRegs += (e.totalSeats - e.availableSeats));
+        
+        document.getElementById('org-stats').innerHTML = `
+          <div class="stat-card"><div class="stat-info"><div class="value">${events.length}</div><div class="label">Total Events</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value" style="color:var(--success);">${events.filter(e=>e.status==='approved').length}</div><div class="label">Approved</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value" style="color:var(--warning);">${events.filter(e=>e.status==='pending').length}</div><div class="label">Pending</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value">${totalRegs}</div><div class="label">Registrations</div></div></div>
+        `;
+
+        let html = `<thead><tr><th>Event</th><th>Date</th><th>Status</th><th>Registrations</th></tr></thead><tbody>`;
+        events.slice(0,4).forEach(e => {
+          let sBadge = `<span class="badge badge-warning">Pending</span>`;
+          if (e.status === 'approved') sBadge = `<span class="badge badge-success">Approved</span>`;
+          else if (e.status === 'rejected') sBadge = `<span class="badge badge-danger">Rejected</span>`;
+          
+          html += `<tr>
+            <td><strong>${e.title}</strong></td>
+            <td>${EventHub.formatDate(e.date)}</td>
+            <td>${sBadge}</td>
+            <td>${e.totalSeats - e.availableSeats} / ${e.totalSeats}</td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('o-events-table').innerHTML = events.length ? html : `<tr><td colspan="4" class="text-center text-muted">No events yet.</td></tr>`;
+      }
+      else if (currentSection === 'organizer-events') {
+        const events = EventHub.getEvents().filter(e => e.organizerId === currentUser.id);
+        navTo('organizer-home'); // Re-using home table for now, or just build full here
+      }
+      else if (currentSection === 'organizer-payments') {
+        const events = EventHub.getEvents().filter(e => e.organizerId === currentUser.id).map(e=>e.id);
+        const regs = EventHub.getRegistrations().filter(r => events.includes(r.eventId) && r.paymentStatus !== 'free');
+        
+        let html = `<thead><tr><th>User</th><th>Event</th><th>Amount</th><th>Reference No.</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+        regs.forEach(r => {
+          const ev = EventHub.getEventById(r.eventId);
+          const u = EventHub.getUsers().find(x=>x.id===r.userId);
+          let pBadge = `<span class="badge badge-warning">Pending</span>`;
+          if (r.paymentStatus === 'verified') pBadge = `<span class="badge badge-success">Verified</span>`;
+          else if (r.paymentStatus === 'rejected') pBadge = `<span class="badge badge-danger">Rejected</span>`;
+
+          html += `<tr>
+            <td>${u?.name}<br><small class="text-muted">${u?.email}</small></td>
+            <td>${ev?.title}</td>
+            <td>${EventHub.formatCurrency(ev?.fee)}</td>
+            <td><strong>${r.paymentProof}</strong></td>
+            <td>${pBadge}</td>
+            <td>
+              ${r.paymentStatus === 'pending' ? `
+                <button class="btn btn-success btn-sm" onclick="EventHub.verifyPayment('${r.id}', 'verified'); loadDashboardData();">Verify</button>
+                <button class="btn btn-danger btn-sm" onclick="EventHub.verifyPayment('${r.id}', 'rejected'); loadDashboardData();">Reject</button>
+              ` : '-'}
+            </td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('o-payments-table').innerHTML = regs.length ? html : `<tr><td colspan="6" class="text-center text-muted">No payments to verify.</td></tr>`;
+      }
+      else if (currentSection === 'admin-home') {
+        document.getElementById('admin-welcome').innerHTML = `<h2>Admin Control Panel</h2><p>Overview of platform metrics.</p>`;
+        const rpt = EventHub.generateReport('events');
+        const usr = EventHub.generateReport('users');
+        const reg = EventHub.generateReport('registrations');
+        
+        document.getElementById('a-stats').innerHTML = `
+          <div class="stat-card"><div class="stat-info"><div class="value">${rpt.total}</div><div class="label">Total Events</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value">${usr.total}</div><div class="label">Total Users</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value">${reg.total}</div><div class="label">Registrations</div></div></div>
+          <div class="stat-card"><div class="stat-info"><div class="value" style="color:var(--warning);">${rpt.pending}</div><div class="label">Pending Approvals</div></div></div>
+        `;
+      }
+      else if (currentSection === 'admin-approve') {
+        loadAdminApprovals('all');
+      }
+      else if (currentSection === 'admin-users') {
+        const users = EventHub.getUsers();
+        let html = `<thead><tr><th>ID</th><th>Name & Email</th><th>Role</th><th>Mobile</th><th>Status</th><th>Joined</th></tr></thead><tbody>`;
+        users.forEach(u => {
+          let rBadge = '';
+          if(u.role==='admin') rBadge='<span class="badge badge-danger">Admin</span>';
+          if(u.role==='organizer') rBadge='<span class="badge badge-info">Organizer</span>';
+          if(u.role==='user') rBadge='<span class="badge badge-secondary">User</span>';
+          
+          html += `<tr>
+            <td><small class="text-muted">${u.id}</small></td>
+            <td><strong>${u.name}</strong><br><small class="text-muted">${u.email}</small></td>
+            <td>${rBadge}</td>
+            <td>${u.mobile}</td>
+            <td><span class="badge ${u.status==='active'?'badge-success':'badge-secondary'}">${u.status}</span></td>
+            <td>${EventHub.formatDate(u.createdAt)}</td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('a-users-table').innerHTML = html;
+      }
+      else if (currentSection === 'admin-registrations') {
+        const regs = EventHub.getRegistrations();
+        let html = `<thead><tr><th>ID</th><th>User ID</th><th>Event ID</th><th>Status</th><th>Payment</th></tr></thead><tbody>`;
+        regs.forEach(r => {
+          html += `<tr>
+            <td><small class="text-muted">${r.id}</small></td>
+            <td>${r.userId}</td>
+            <td>${r.eventId}</td>
+            <td><span class="badge">${r.status}</span></td>
+            <td><span class="badge">${r.paymentStatus}</span></td>
+          </tr>`;
+        });
+        html += `</tbody>`;
+        document.getElementById('a-regs-table').innerHTML = html;
+      }
+      else if (currentSection === 'admin-reports') {
+        const rpt = EventHub.generateReport('events');
+        const ctx = document.getElementById('chart-events');
+        if(window.myChart) window.myChart.destroy();
+        window.myChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: Object.keys(rpt.byCategory),
+            datasets: [{
+              data: Object.values(rpt.byCategory),
+              backgroundColor: ['#7c3aed','#ec4899','#0ea5e9','#10b981','#f59e0b'],
+              borderWidth: 0
+            }]
+          },
+          options: { plugins: { legend: { position:'right', labels: {color:'#f1f5f9'} } } }
+        });
+        
+        const urpt = EventHub.generateReport('users');
+        document.getElementById('report-stats-html').innerHTML = `
+          <ul style="font-size:1rem; line-height:2.5;">
+            <li><strong>Total Users:</strong> ${urpt.total}</li>
+            <li><strong>Admins:</strong> ${urpt.admins}</li>
+            <li><strong>Organizers:</strong> ${urpt.organizers}</li>
+            <li><strong>Attendees:</strong> ${urpt.attendees}</li>
+            <div class="divider"></div>
+            <li><strong>Total Events:</strong> ${rpt.total}</li>
+            <li><strong>Approved:</strong> ${rpt.approved}</li>
+          </ul>
+        `;
+      }
+    }
+
+    function loadAdminApprovals(filter) {
+      document.querySelectorAll('#a-approve-tabs .filter-tab').forEach(el=>el.classList.remove('active'));
+      event?.target?.classList.add('active');
+      
+      let events = EventHub.getEvents();
+      if(filter !== 'all') events = events.filter(e => e.status === filter);
+      
+      let html = `<thead><tr><th>Event</th><th>Organizer</th><th>Category</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+      events.forEach(e => {
+        let sBadge = `<span class="badge badge-warning">Pending</span>`;
+        if (e.status === 'approved') sBadge = `<span class="badge badge-success">Approved</span>`;
+        else if (e.status === 'rejected') sBadge = `<span class="badge badge-danger">Rejected</span>`;
+        
+        html += `<tr>
+          <td><strong>${e.title}</strong><br><small class="text-muted">${e.venue}, ${e.location}</small></td>
+          <td>${e.organizerName}</td>
+          <td><span class="badge badge-primary">${e.category}</span></td>
+          <td>${EventHub.formatDate(e.date)}</td>
+          <td>${sBadge}</td>
+          <td>
+            <button class="btn btn-outline-sm mb-4" style="margin-bottom:4px;" onclick="window.open('event-detail.html?id=${e.id}','_blank')">View</button>
+            ${e.status === 'pending' ? `
+              <br><button class="btn btn-success btn-sm" onclick="EventHub.approveEvent('${e.id}'); loadAdminApprovals('${filter}');">Approve</button>
+              <button class="btn btn-danger btn-sm" onclick="EventHub.rejectEvent('${e.id}'); loadAdminApprovals('${filter}');">Reject</button>
+            ` : ''}
+          </td>
+        </tr>`;
+      });
+      html += `</tbody>`;
+      document.getElementById('a-approve-table').innerHTML = events.length ? html : `<tr><td colspan="6" class="text-center text-muted">No events found.</td></tr>`;
+    }
+
+    function handleCreateEvent(e) {
+      e.preventDefault();
+      const data = {
+        title: document.getElementById('ce-title').value,
+        category: document.getElementById('ce-cat').value,
+        description: document.getElementById('ce-desc').value,
+        date: document.getElementById('ce-date').value,
+        time: document.getElementById('ce-time').value,
+        endTime: document.getElementById('ce-endtime').value,
+        location: document.getElementById('ce-loc').value,
+        venue: document.getElementById('ce-venue').value,
+        lat: parseFloat(document.getElementById('ce-lat').value),
+        lng: parseFloat(document.getElementById('ce-lng').value),
+        totalSeats: parseInt(document.getElementById('ce-seats').value),
+        fee: parseInt(document.getElementById('ce-fee').value),
+        organizerId: currentUser.id,
+        organizerName: currentUser.name
+      };
+      
+      const btn = document.getElementById('btn-submit-event');
+      btn.disabled = true;
+      btn.innerHTML = 'Submitting...';
+      
+      setTimeout(() => {
+        EventHub.createEvent(data);
+        EventHub.showToast('Event submitted for approval!', 'success');
+        document.getElementById('form-create-event').reset();
+        btn.disabled = false;
+        btn.innerHTML = 'Submit for Approval';
+        navTo('organizer-home');
+      }, 800);
+    }
+
+    function openMapModal() {
+      document.getElementById('mapModal').style.display = 'flex';
+      if (!mapPicker) {
+        mapPicker = L.map('create-map-modal').setView([20.5937, 78.9629], 4);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(mapPicker);
+        mapPicker.on('click', function(e) {
+          if (mapMarker) mapPicker.removeLayer(mapMarker);
+          mapMarker = L.marker(e.latlng).addTo(mapPicker);
+          document.getElementById('ce-lat').value = e.latlng.lat.toFixed(6);
+          document.getElementById('ce-lng').value = e.latlng.lng.toFixed(6);
+          document.getElementById('map-coords-display').innerText = `Lat: ${e.latlng.lat.toFixed(4)}, Lng: ${e.latlng.lng.toFixed(4)}`;
+        });
+      }
+      setTimeout(() => mapPicker.invalidateSize(), 100);
+    }
+    
+    function closeMapModal() {
+      document.getElementById('mapModal').style.display = 'none';
+      if(document.getElementById('ce-lat').value) EventHub.showToast('Location selected', 'success');
+    }
+  </script>
+</body>
+</html>
+
