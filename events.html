@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventHub - Explore Events</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="events.html" class="nav-link active">Events</a>
+      <a href="events.html#map" class="nav-link">Map</a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container">
+      <h1>Explore <span class="gradient-text">Events</span></h1>
+      <div class="breadcrumb"><a href="index.html">Home</a> &gt; Events</div>
+    </div>
+  </div>
+
+  <div class="events-layout">
+    <!-- SIDEBAR FILTERS -->
+    <aside class="filter-sidebar">
+      <h3><i class="fa-solid fa-filter"></i> Filters</h3>
+      
+      <div class="form-group">
+        <div class="input-icon">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="f-search" class="form-control" placeholder="Search events..." oninput="applyFilters()">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h4>Category</h4>
+        <div id="f-categories">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h4>Location</h4>
+        <div class="input-icon">
+          <i class="fa-solid fa-location-dot"></i>
+          <input type="text" id="f-location" class="form-control" placeholder="City or Venue" oninput="applyFilters()">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h4>Price</h4>
+        <label class="radio-item"><input type="radio" name="f-price" value="all" checked onchange="applyFilters()"> All Prices</label>
+        <label class="radio-item"><input type="radio" name="f-price" value="free" onchange="applyFilters()"> Free Events</label>
+        <label class="radio-item"><input type="radio" name="f-price" value="paid" onchange="applyFilters()"> Paid Events</label>
+      </div>
+
+      <button class="btn btn-outline btn-full" onclick="clearFilters()">Clear Filters</button>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main>
+      <div class="flex-between mb-6">
+        <div style="font-size:1.1rem; font-weight:600;"><span id="results-count">0</span> Events Found</div>
+        <div class="view-toggle">
+          <button class="view-btn active" id="btn-grid" onclick="setView('grid')" title="Grid View"><i class="fa-solid fa-border-all"></i></button>
+          <button class="view-btn" id="btn-list" onclick="setView('list')" title="List View"><i class="fa-solid fa-list"></i></button>
+          <button class="view-btn" id="btn-map" onclick="setView('map')" title="Map View"><i class="fa-solid fa-map-location-dot"></i></button>
+        </div>
+      </div>
+
+      <!-- RESULTS CONTAINER -->
+      <div id="results-container">
+        <div class="loader" id="loader"></div>
+      </div>
+
+      <!-- MAP CONTAINER (hidden initially) -->
+      <div id="map-container" style="display:none;">
+        <div class="map-container" style="height:500px; margin-bottom:20px;" id="events-map"></div>
+        <div id="map-list" class="events-grid"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="app.js"></script>
+  <script>
+    let currentView = 'grid';
+    let mapInstance = null;
+    let markersLayer = null;
+
+    const CATEGORIES = ['Music', 'Tech', 'Sports', 'Food', 'Art', 'Business', 'Education', 'Health'];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      EventHub.initNavbar();
+      
+      // Render Category checkboxes
+      const catContainer = document.getElementById('f-categories');
+      CATEGORIES.forEach(cat => {
+        catContainer.innerHTML += `
+          <label class="checkbox-item">
+            <input type="checkbox" class="cat-check" value="${cat}" onchange="applyFilters()"> ${cat}
+          </label>
+        `;
+      });
+
+      // Parse URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('q')) document.getElementById('f-search').value = urlParams.get('q');
+      if (urlParams.has('location')) document.getElementById('f-location').value = urlParams.get('location');
+      if (urlParams.has('category')) {
+        const c = urlParams.get('category');
+        const chk = document.querySelector(`.cat-check[value="${c}"]`);
+        if (chk) chk.checked = true;
+      }
+      
+      if (window.location.hash === '#map') {
+        currentView = 'map';
+        updateViewButtons();
+      }
+
+      applyFilters();
+    });
+
+    function clearFilters() {
+      document.getElementById('f-search').value = '';
+      document.getElementById('f-location').value = '';
+      document.querySelectorAll('.cat-check').forEach(c => c.checked = false);
+      document.querySelector('input[name="f-price"][value="all"]').checked = true;
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const q = document.getElementById('f-search').value;
+      const loc = document.getElementById('f-location').value;
+      const price = document.querySelector('input[name="f-price"]:checked').value;
+      
+      // we only use the exact category in app.js searchEvents if it's a single string.
+      // Since we support multiple checkboxes, we will filter manually here after fetching base.
+      
+      const selectedCats = Array.from(document.querySelectorAll('.cat-check:checked')).map(c => c.value);
+      
+      let events = EventHub.searchEvents(q, '', loc, '', price);
+      
+      if (selectedCats.length > 0) {
+        events = events.filter(e => selectedCats.includes(e.category));
+      }
+
+      document.getElementById('results-count').innerText = events.length;
+      renderEvents(events);
+    }
+
+    function setView(view) {
+      currentView = view;
+      updateViewButtons();
+      applyFilters();
+    }
+
+    function updateViewButtons() {
+      document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-'+currentView).classList.add('active');
+    }
+
+    function renderEvents(events) {
+      const container = document.getElementById('results-container');
+      const mapCont = document.getElementById('map-container');
+      
+      if (events.length === 0) {
+        container.style.display = 'block';
+        mapCont.style.display = 'none';
+        container.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><h3>No events found</h3><p>Try adjusting your filters or search terms.</p></div>';
+        return;
+      }
+
+      if (currentView === 'grid') {
+        container.style.display = 'block';
+        mapCont.style.display = 'none';
+        let html = '<div class="events-grid">';
+        events.forEach((ev, i) => {
+          const bg = EventHub.getCategoryColor(ev.category);
+          const delay = (i%6)*0.1;
+          html += `
+            <div class="card event-card reveal revealed" style="animation: slideInRight 0.4s ease ${delay}s both;" onclick="window.location.href='event-detail.html?id=${ev.id}'">
+              <div class="event-card-header" style="background:${bg}">
+                <span class="badge" style="background:rgba(0,0,0,0.5);color:#fff;backdrop-filter:blur(4px);border:none;">
+                  ${EventHub.getCategoryIcon(ev.category)} ${ev.category}
+                </span>
+              </div>
+              <div class="event-card-body">
+                <h3>${ev.title}</h3>
+                <div class="event-meta"><i class="fa-regular fa-calendar"></i> ${EventHub.formatDate(ev.date)}</div>
+                <div class="event-meta"><i class="fa-solid fa-location-dot"></i> ${ev.location}</div>
+                <div class="progress-bar mt-4"><div class="progress-bar-fill" style="width:${(ev.availableSeats/ev.totalSeats)*100}%"></div></div>
+                <div style="font-size:0.75rem; color:var(--text-secondary);">${ev.availableSeats} seats left</div>
+              </div>
+              <div class="event-card-footer">
+                <div style="font-weight:700;">${EventHub.formatCurrency(ev.fee)}</div>
+                <button class="btn btn-primary-sm">Details</button>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      } 
+      else if (currentView === 'list') {
+        container.style.display = 'block';
+        mapCont.style.display = 'none';
+        let html = '<div style="display:flex; flex-direction:column; gap:12px;">';
+        events.forEach(ev => {
+          const bg = EventHub.getCategoryColor(ev.category);
+          html += `
+            <div class="events-list-item" onclick="window.location.href='event-detail.html?id=${ev.id}'" style="cursor:pointer;">
+              <div class="list-item-color" style="background:${bg}"></div>
+              <div class="list-item-body">
+                <div class="flex-between">
+                  <h3 style="margin:0; font-size:1.1rem;">${ev.title}</h3>
+                  <div style="font-weight:700; color:var(--primary-light);">${EventHub.formatCurrency(ev.fee)}</div>
+                </div>
+                <div style="display:flex; gap:20px; margin-top:8px; font-size:0.85rem; color:var(--text-secondary);">
+                  <div><i class="fa-regular fa-calendar" style="color:var(--primary);"></i> ${EventHub.formatDate(ev.date)}</div>
+                  <div><i class="fa-solid fa-location-dot" style="color:var(--accent);"></i> ${ev.venue}, ${ev.location}</div>
+                  <div><i class="fa-solid fa-tag" style="color:var(--info);"></i> ${ev.category}</div>
+                </div>
+              </div>
+            </div>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+      else if (currentView === 'map') {
+        container.style.display = 'none';
+        mapCont.style.display = 'block';
+        
+        if (!mapInstance) {
+          mapInstance = L.map('events-map').setView([20.5937, 78.9629], 4);
+          L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
+          }).addTo(mapInstance);
+          markersLayer = L.layerGroup().addTo(mapInstance);
+        }
+        
+        markersLayer.clearLayers();
+        const bounds = [];
+        
+        let listHtml = '';
+        events.forEach(ev => {
+          if(ev.lat && ev.lng) {
+            bounds.push([ev.lat, ev.lng]);
+            const marker = L.marker([ev.lat, ev.lng]).addTo(markersLayer);
+            marker.bindPopup(`<strong style="color:#000;">${ev.title}</strong><br>${EventHub.formatDate(ev.date)}<br><a href="event-detail.html?id=${ev.id}">View Details</a>`);
+          }
+          
+          // Add small cards below map
+          listHtml += `
+            <div class="card event-card" onclick="window.location.href='event-detail.html?id=${ev.id}'">
+              <div class="event-card-body">
+                <div class="badge badge-primary" style="margin-bottom:8px;">${ev.category}</div>
+                <h3 style="margin:0;">${ev.title}</h3>
+                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">${EventHub.formatDate(ev.date)}</div>
+              </div>
+            </div>`;
+        });
+        
+        document.getElementById('map-list').innerHTML = listHtml;
+        
+        if (bounds.length > 0) {
+          mapInstance.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+        } else {
+          mapInstance.setView([20.5937, 78.9629], 4);
+        }
+        // Fix leaflet map render issue when unhidden
+        setTimeout(() => mapInstance.invalidateSize(), 100);
+      }
+    }
+  </script>
+</body>
+</html>
+
