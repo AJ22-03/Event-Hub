@@ -12,6 +12,9 @@ npm start
 The API and frontend run at `http://127.0.0.1:3000`.
 Open `http://127.0.0.1:3000/` to load the website.
 
+In VS Code, open the Run and Debug panel, choose **Start EventHub**, and press
+F5. VS Code will start the backend and open the website automatically.
+
 ## API
 
 - `GET /api/health`

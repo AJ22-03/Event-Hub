@@ -1,0 +1,22 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Start EventHub",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "HOST": "127.0.0.1",
+        "PORT": "3000"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "EventHub API running at http://127.0.0.1:3000",
+        "uriFormat": "http://127.0.0.1:3000/"
+      },
+      "console": "integratedTerminal"
+    }
+  ]
+}
