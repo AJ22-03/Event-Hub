@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 3000);
 const HOST = process.env.HOST || '127.0.0.1';
 const DATA_DIR = path.join(__dirname, 'data');
 const DATA_FILE = path.join(DATA_DIR, 'database.json');
+const FRONTEND_DIR = path.join(__dirname, '..', 'frontend');
 const sessions = new Map();
 
 const seedData = {
@@ -85,6 +86,25 @@ function fail(response, status, message) {
   send(response, status, { error: message });
 }
 
+function serveFrontend(url, response) {
+  const requestedPath = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
+  const filePath = path.resolve(FRONTEND_DIR, `.${requestedPath}`);
+  if (!filePath.startsWith(`${path.resolve(FRONTEND_DIR)}${path.sep}`)) {
+    return fail(response, 403, 'Forbidden');
+  }
+
+  fs.readFile(filePath, (error, content) => {
+    if (error) return fail(response, error.code === 'ENOENT' ? 404 : 500, 'Frontend file not found');
+    const contentTypes = {
+      '.css': 'text/css; charset=utf-8',
+      '.html': 'text/html; charset=utf-8',
+      '.js': 'text/javascript; charset=utf-8'
+    };
+    response.writeHead(200, { 'Content-Type': contentTypes[path.extname(filePath)] || 'application/octet-stream' });
+    response.end(content);
+  });
+}
+
 function readBody(request) {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -140,6 +160,7 @@ async function handle(request, response) {
   const parts = url.pathname.split('/').filter(Boolean);
   const body = ['POST', 'PUT', 'PATCH'].includes(request.method) ? await readBody(request) : {};
 
+  if (!url.pathname.startsWith('/api/')) return serveFrontend(url, response);
   if (request.method === 'GET' && url.pathname === '/api/health') {
     return send(response, 200, { status: 'ok', service: 'event-hub-api' });
   }

@@ -5,10 +5,12 @@
 Requires Node.js 18 or newer. No external packages are required.
 
 ```bash
+cd backend
 npm start
 ```
 
-The API runs at `http://127.0.0.1:3000`.
+The API and frontend run at `http://127.0.0.1:3000`.
+Open `http://127.0.0.1:3000/` to load the website.
 
 ## API
 
