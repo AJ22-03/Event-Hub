@@ -586,7 +586,7 @@
       EventHub.initScrollReveal();
 
       // 2. GSAP Hero Entrance Animations
-      if (typeof gsap !== 'undefined') {
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
         gsap.registerPlugin(ScrollTrigger);
         gsap.from(".gsap-hero", {
           y: 45,
@@ -629,7 +629,13 @@
       const camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
       camera.position.z = 4.6;
 
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      let renderer;
+      try {
+        renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+      } catch (error) {
+        console.warn('3D hero disabled because WebGL is unavailable.', error);
+        return;
+      }
       renderer.setSize(w, h);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.domElement.style.width = '100%';
@@ -850,7 +856,7 @@
     /* ── LEAFLET MINI-MAP WITH CUSTOM DARK TILES ────────────── */
     function initMiniMap() {
       const mapEl = document.getElementById('mini-map');
-      if (!mapEl) return;
+      if (!mapEl || typeof L === 'undefined') return;
 
       const map = L.map('mini-map', { scrollWheelZoom: false }).setView([20.5937, 78.9629], 5);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
