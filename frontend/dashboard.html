@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — EventHub</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="events.html" class="nav-link">Events</a>
+      <a href="quiz.html" class="nav-link">Quiz Arena <span class="nav-badge-new">NEW</span></a>
+      <a href="ai-assistant.html" class="nav-link">AI Concierge <span class="nav-badge-new">AI</span></a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- DASHBOARD MAIN WRAPPER -->
+  <div class="dashboard-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="dashboard-sidebar">
+      <div class="dashboard-user-card">
+        <div class="user-avatar-circle" id="dash-avatar-letter">U</div>
+        <div>
+          <h4 style="font-size:1.05rem; color:var(--cream); margin-bottom:2px;" id="dash-user-name">User Name</h4>
+          <span class="badge badge-gold" id="dash-user-role" style="font-size:0.7rem; padding:2px 8px;">USER</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-menu" id="sidebar-menu-items">
+        <!-- Rendered by js/dashboard.js -->
+      </nav>
+
+      <div style="margin-top:auto; padding-top:20px; border-top:1px solid rgba(212,175,55,0.2);">
+        <button onclick="EventHub.logout()" class="btn btn-outline btn-full" style="font-size:0.85rem;">
+          <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT -->
+    <main class="dashboard-main">
+      <header class="dashboard-topbar">
+        <h2 id="dashboard-view-title">Overview</h2>
+        <a href="events.html" class="btn btn-primary-sm">
+          <i class="fa-solid fa-compass"></i> Explore Catalog
+        </a>
+      </header>
+
+      <div id="dashboard-view-content">
+        <!-- Rendered by js/dashboard.js -->
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Modular Interlinked JavaScript Files -->
+  <script src="js/app-core.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

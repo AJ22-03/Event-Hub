@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventHub — Premier Cultural Experiences & Live Gatherings</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="bg-glow-orb orb-maroon"></div>
+  <div class="bg-glow-orb orb-gold"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link active">Home</a>
+      <a href="events.html" class="nav-link">Events</a>
+      <a href="quiz.html" class="nav-link">Quiz Arena <span class="nav-badge-new">NEW</span></a>
+      <a href="ai-assistant.html" class="nav-link">AI Concierge <span class="nav-badge-new">AI</span></a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-badge-gold">
+        <i class="fa-solid fa-sparkles"></i> Curated Gatherings & Live Spectacles
+      </div>
+      <h1 class="hero-title">
+        Discover <span class="gold-accent">Extraordinary</span> Cultural Experiences
+      </h1>
+      <p class="hero-subtitle">
+        Immerse yourself in world-class music festivals, tech hackathons, athletic marathons, and culinary celebrations across premier national destinations.
+      </p>
+
+      <!-- Quick Search Bar -->
+      <div class="hero-search-lux">
+        <input type="text" id="hero-keyword" placeholder="Search events, artists, venues..." />
+        <select id="hero-category">
+          <option value="">All Categories</option>
+          <option value="Music">Music & Concerts</option>
+          <option value="Tech">Tech & Hackathons</option>
+          <option value="Sports">Sports & Fitness</option>
+          <option value="Food">Food & Culinary</option>
+          <option value="Art">Arts & Heritage</option>
+          <option value="Business">Business & Startups</option>
+        </select>
+        <button id="btn-hero-search">
+          <i class="fa-solid fa-magnifying-glass"></i> Explore
+        </button>
+      </div>
+    </div>
+
+    <!-- 3D Visual Floating Display -->
+    <div class="hero-visual-stage">
+      <div class="hero-3d-card-stack">
+        <div class="hero-floating-card">
+          <div>
+            <span class="badge badge-gold">Featured Spectacle</span>
+            <h3 style="font-family:'Playfair Display',serif; color:#fff; font-size:1.5rem; margin:16px 0 8px;">
+              Sunburn Arena Fest
+            </h3>
+            <p style="font-size:0.85rem; color:var(--muted-gold);">
+              <i class="fa-solid fa-location-dot"></i> DY Patil Stadium, Mumbai
+            </p>
+          </div>
+          <div>
+            <div class="flex-between" style="border-top:1px solid rgba(212,175,55,0.3); padding-top:14px;">
+              <div>
+                <span style="font-size:0.75rem; color:var(--muted-gold);">Tickets From</span>
+                <div style="font-size:1.25rem; font-weight:700; color:var(--gold-light);">₹1,500</div>
+              </div>
+              <a href="event-detail.html?id=e1" class="btn-primary-sm">Get Passes</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURED EVENTS SHOWCASE -->
+  <section class="container" style="padding: 70px 24px;">
+    <div class="section-header">
+      <div class="section-subtitle">Handpicked For You</div>
+      <h2 class="section-title">Trending Experiences</h2>
+    </div>
+    <div id="featured-events-grid" class="grid-3">
+      <!-- Rendered by js/home.js -->
+    </div>
+    <div style="text-align:center; margin-top:45px;">
+      <a href="events.html" class="btn btn-outline">
+        View All Events Catalog &rarr;
+      </a>
+    </div>
+  </section>
+
+  <!-- CATEGORIES GRID -->
+  <section class="container" style="padding: 40px 24px 70px;">
+    <div class="section-header">
+      <div class="section-subtitle">Browse By Genre</div>
+      <h2 class="section-title">Explore Categories</h2>
+    </div>
+    <div id="category-grid" class="grid-3">
+      <!-- Rendered by js/home.js -->
+    </div>
+  </section>
+
+  <!-- INNOVATION SPOTLIGHT: AI ASSISTANT & QUIZ ARENA -->
+  <section class="container" style="padding: 30px 24px 80px;">
+    <div class="spotlight-grid">
+      <!-- AI Concierge Spotlight -->
+      <div class="spotlight-card">
+        <span class="badge badge-gold" style="margin-bottom:14px;"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Powered</span>
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--cream); margin-bottom:12px;">
+          Meet EventGenie AI Concierge
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:24px; line-height:1.7;">
+          Unsure where to go this weekend? Ask our AI assistant for personalized recommendations tailored to your city, mood, and budget.
+        </p>
+        <a href="ai-assistant.html" class="btn btn-primary">
+          <i class="fa-solid fa-comments"></i> Chat with AI Assistant
+        </a>
+      </div>
+
+      <!-- Live Quiz Arena Spotlight (SRS Specification) -->
+      <div class="spotlight-card">
+        <span class="badge badge-success" style="margin-bottom:14px;"><i class="fa-solid fa-trophy"></i> Gamification Arena</span>
+        <h3 style="font-family:'Playfair Display',serif; font-size:1.7rem; color:var(--cream); margin-bottom:12px;">
+          Live Event Trivia & Quiz Arena
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.95rem; margin-bottom:24px; line-height:1.7;">
+          Test your knowledge in music, tech, and sports trivia. Score above 80% to earn exclusive digital badges and unlock ticket discount vouchers!
+        </p>
+        <a href="quiz.html" class="btn btn-outline">
+          <i class="fa-solid fa-brain"></i> Play Quiz & Win Vouchers
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEAFLET INTERACTIVE VENUE MAP PREVIEW -->
+  <section class="container" style="padding: 20px 24px 90px;">
+    <div class="section-header">
+      <div class="section-subtitle">Geographic Exploration</div>
+      <h2 class="section-title">Live Interactive Venue Map</h2>
+      <p style="color:var(--text-secondary); font-size:0.95rem; margin-top:8px;">
+        Powered by open-source Leaflet.js and OpenStreetMap with zero billing barriers.
+      </p>
+    </div>
+    <div id="home-mini-map" style="height:420px; border-radius:var(--radius-lg); border:1px solid var(--dark-border); overflow:hidden;"></div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-col">
+        <h4 style="font-size:1.4rem;"><i class="fa-solid fa-tent" style="color:var(--gold);"></i> EventHub</h4>
+        <p style="line-height:1.7; margin-top:10px;">
+          The next-generation event discovery, booking, and engagement ecosystem. Built with modular web architecture and open-source geolocation.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="events.html">Browse Events</a></li>
+          <li><a href="quiz.html">Quiz & Gamification</a></li>
+          <li><a href="ai-assistant.html">AI Concierge</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="dashboard.html">User Dashboard</a></li>
+          <li><a href="login.html">Login & Register</a></li>
+          <li><a href="dashboard.html#create-event">Host an Event</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Features</h4>
+        <ul>
+          <li>Leaflet.js Geo-mapping</li>
+          <li>QR Digital Ticket Passes</li>
+          <li>Timed Knowledge Quizzes</li>
+          <li>Real-Time Seat Booking</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 EventHub Inc. All rights reserved. Designed with Heritage Luxury & Modular Architecture.
+    </div>
+  </footer>
+
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Modular Interlinked JavaScript Files -->
+  <script src="js/app-core.js"></script>
+  <script src="js/map-module.js"></script>
+  <script src="js/home.js"></script>
+</body>
+</html>

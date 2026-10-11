@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Events — EventHub</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/events.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="events.html" class="nav-link active">Events</a>
+      <a href="quiz.html" class="nav-link">Quiz Arena <span class="nav-badge-new">NEW</span></a>
+      <a href="ai-assistant.html" class="nav-link">AI Concierge <span class="nav-badge-new">AI</span></a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <header class="events-header">
+    <div class="container">
+      <div style="font-size:0.85rem; color:var(--muted-gold); margin-bottom:8px;">
+        <a href="index.html">Home</a> &gt; Events Catalog
+      </div>
+      <h1>Explore <span style="color:var(--gold-light);">Live Events</span></h1>
+      <p style="color:var(--text-secondary); max-width:600px;">
+        Discover upcoming music festivals, technology summits, half marathons, and food celebrations. Filter by date, fee, or view on the interactive venue map.
+      </p>
+    </div>
+  </header>
+
+  <!-- EVENTS MAIN LAYOUT -->
+  <div class="container events-layout">
+    
+    <!-- SIDEBAR FILTERS -->
+    <aside class="filter-sidebar">
+      <h3>
+        <span><i class="fa-solid fa-sliders"></i> Filters</span>
+        <button onclick="resetFilters()" style="background:none; border:none; color:var(--muted-gold); font-size:0.8rem; cursor:pointer; text-decoration:underline;">Reset</button>
+      </h3>
+
+      <!-- Keyword Search -->
+      <div class="form-group">
+        <label>Search Keyword</label>
+        <div class="input-icon">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="filter-search" class="form-control" placeholder="Festival, artist, venue..." />
+        </div>
+      </div>
+
+      <!-- City / Venue -->
+      <div class="form-group">
+        <label>City or Venue</label>
+        <div class="input-icon">
+          <i class="fa-solid fa-location-dot"></i>
+          <input type="text" id="filter-city" class="form-control" placeholder="Mumbai, Bangalore, etc." />
+        </div>
+      </div>
+
+      <!-- Categories Filter -->
+      <div class="filter-group">
+        <h4>Category</h4>
+        <div id="category-chips" class="filter-chip-group">
+          <!-- Rendered by js/events.js -->
+        </div>
+      </div>
+
+      <!-- Price Radio Filter -->
+      <div class="filter-group">
+        <h4>Ticket Price</h4>
+        <select id="filter-price" class="form-control">
+          <option value="all">All Prices</option>
+          <option value="free">Free Events Only (₹0)</option>
+          <option value="paid">Paid Events</option>
+        </select>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="filter-group">
+        <h4>Sort By</h4>
+        <select id="filter-sort" class="form-control">
+          <option value="date">Event Date (Chronological)</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="seats">Available Seats</option>
+        </select>
+      </div>
+    </aside>
+
+    <!-- EVENTS LISTINGS COLUMN -->
+    <main class="events-catalog-main">
+      
+      <!-- TOOLBAR -->
+      <div class="catalog-toolbar">
+        <div id="events-count" style="font-weight:600; color:var(--gold-light);">
+          Loading events...
+        </div>
+        <div class="view-toggles">
+          <button class="view-btn active" id="view-grid" onclick="setView('grid')" title="Grid View">
+            <i class="fa-solid fa-grip"></i>
+          </button>
+          <button class="view-btn" id="view-list" onclick="setView('list')" title="List View">
+            <i class="fa-solid fa-list"></i>
+          </button>
+          <button class="view-btn" id="view-map" onclick="setView('map')" title="Interactive Map View">
+            <i class="fa-solid fa-map-location-dot"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- GRID / LIST VIEW CONTAINER -->
+      <div id="events-grid-view">
+        <!-- Rendered by js/events.js -->
+      </div>
+
+      <!-- LEAFLET MAP VIEW CONTAINER -->
+      <div id="events-map-view" class="map-view-container" style="display:none;">
+        <div id="events-map"></div>
+      </div>
+
+    </main>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      &copy; 2026 EventHub. All rights reserved. Cleanly separated modular files.
+    </div>
+  </footer>
+
+  <!-- Leaflet JS Library -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Modular Interlinked JavaScript Files -->
+  <script src="js/app-core.js"></script>
+  <script src="js/map-module.js"></script>
+  <script src="js/events.js"></script>
+</body>
+</html>

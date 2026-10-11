@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Event Quiz & Trivia Arena — EventHub</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/quiz.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="events.html" class="nav-link">Events</a>
+      <a href="quiz.html" class="nav-link active">Quiz Arena <span class="nav-badge-new">NEW</span></a>
+      <a href="ai-assistant.html" class="nav-link">AI Concierge <span class="nav-badge-new">AI</span></a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- QUIZ CONTAINER -->
+  <div class="quiz-container">
+    
+    <!-- 1. WELCOME & CATEGORY SELECTION SCREEN -->
+    <div class="quiz-card" id="quiz-welcome-screen">
+      <div class="quiz-welcome">
+        <span class="badge badge-gold" style="margin-bottom:12px;">Gamification & Assessment Arena</span>
+        <h2>Welcome to EventHub Trivia Arena</h2>
+        <p style="color:var(--text-secondary); max-width:620px; margin:0 auto; line-height:1.7;">
+          Put your event knowledge to the test! Choose a category below, answer timed multiple-choice questions, and score over 80% to earn exclusive digital badges and ticket discount promo codes.
+        </p>
+
+        <!-- RULES BOX (Fulfilling SRS Requirement: Welcome message and explain rules) -->
+        <ul class="quiz-rules-list">
+          <li>
+            <i class="fa-solid fa-circle-check"></i>
+            <span><strong>Rules & Structure:</strong> Each quiz contains curated questions structured as A, B, C, D choices.</span>
+          </li>
+          <li>
+            <i class="fa-solid fa-stopwatch"></i>
+            <span><strong>Timed Questions:</strong> You have 20 seconds to answer each question before the timer expires.</span>
+          </li>
+          <li>
+            <i class="fa-solid fa-lightbulb"></i>
+            <span><strong>Instant Feedback:</strong> Immediately after submitting, you will see if your answer was correct, along with an explanation.</span>
+          </li>
+          <li>
+            <i class="fa-solid fa-trophy"></i>
+            <span><strong>Rewards:</strong> Score &ge;80% to unlock a 20% discount coupon code applicable on any event booking!</span>
+          </li>
+        </ul>
+
+        <h4 style="font-family:'Playfair Display',serif; color:var(--cream); font-size:1.2rem; margin-bottom:16px;">
+          Choose Quiz Category:
+        </h4>
+
+        <!-- Category Grid (SRS: Easy access to categories) -->
+        <div class="quiz-cat-grid">
+          <div class="quiz-cat-card active" id="cat-tech" onclick="selectCategory('tech')">
+            <i class="fa-solid fa-microchip"></i>
+            <h4 style="color:var(--cream); margin-bottom:4px;">Tech & Innovation</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Maps, APIs, Web & Architecture</p>
+          </div>
+          <div class="quiz-cat-card" id="cat-music" onclick="selectCategory('music')">
+            <i class="fa-solid fa-music"></i>
+            <h4 style="color:var(--cream); margin-bottom:4px;">Music & Festivals</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">EDM, Sunburn, Bands & Acoustics</p>
+          </div>
+          <div class="quiz-cat-card" id="cat-sports" onclick="selectCategory('sports')">
+            <i class="fa-solid fa-person-running"></i>
+            <h4 style="color:var(--cream); margin-bottom:4px;">Sports & Athletics</h4>
+            <p style="font-size:0.8rem; color:var(--text-secondary);">Marathons, Timing Chips & Stadiums</p>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="padding:14px 40px; font-size:1.05rem;" onclick="startQuiz()">
+          <i class="fa-solid fa-play"></i> Start Quiz Now
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. ACTIVE QUIZ QUESTION SCREEN -->
+    <div class="quiz-card" id="quiz-active-screen" style="display:none;">
+      
+      <!-- Question Header -->
+      <div class="quiz-header-bar">
+        <div class="question-counter" id="question-counter">Question 1 of 4</div>
+        <div class="quiz-timer">
+          <i class="fa-regular fa-clock" style="color:var(--gold);"></i>
+          <span id="quiz-timer-seconds">20</span>s
+        </div>
+        <div class="badge badge-gold" id="running-score-pill">Score: 0 pts</div>
+      </div>
+
+      <!-- Question Text -->
+      <h3 class="question-text" id="question-text">
+        Loading question...
+      </h3>
+
+      <!-- Options Container (A, B, C, D) -->
+      <div class="quiz-options-list" id="quiz-options-container">
+        <!-- Rendered by js/quiz.js -->
+      </div>
+
+      <!-- Immediate Feedback Banner (SRS Requirement) -->
+      <div class="feedback-banner" id="quiz-feedback-box">
+        <!-- Feedback and explanation revealed on submit -->
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; justify-content:flex-end; gap:14px;">
+        <button class="btn btn-primary" id="btn-submit-answer" onclick="submitAnswer()" disabled>
+          <i class="fa-solid fa-check"></i> Submit Answer
+        </button>
+        <button class="btn btn-outline" id="btn-next-question" onclick="nextQuestion()" style="display:none;">
+          Next Question &rarr;
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 3. FINAL RESULTS SCREEN (SRS Requirement: Total score and percentage) -->
+    <div class="quiz-card" id="quiz-results-screen" style="display:none;">
+      <div class="results-card">
+        <h2 style="font-family:'Playfair Display',serif; color:var(--cream); font-size:2.2rem; margin-bottom:8px;">
+          Quiz Completed!
+        </h2>
+        <p style="color:var(--text-secondary); font-size:0.95rem;">Here is your performance breakdown as per SRS specification.</p>
+
+        <div class="score-circle">
+          <div class="score-number" id="res-total-score">0 / 40</div>
+          <div class="score-pct" id="res-percentage">0%</div>
+        </div>
+
+        <div id="res-badge-title" style="margin-bottom:14px;"></div>
+        <p style="color:var(--cream); font-size:1.05rem;" id="res-correct-count">0 of 4 Questions Correct</p>
+
+        <!-- Unlocked Promo Voucher -->
+        <div id="res-promo-box"></div>
+
+        <div style="display:flex; justify-content:center; gap:16px; margin-top:30px;">
+          <button class="btn btn-outline" onclick="restartQuiz()">
+            <i class="fa-solid fa-rotate-right"></i> Retake / Other Topics
+          </button>
+          <a href="events.html" class="btn btn-primary">
+            <i class="fa-solid fa-ticket"></i> Use Discount on Events
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      &copy; 2026 EventHub. All rights reserved. Meets Quiz SRS Specification.
+    </div>
+  </footer>
+
+  <!-- Modular Interlinked JavaScript Files -->
+  <script src="js/app-core.js"></script>
+  <script src="js/quiz.js"></script>
+</body>
+</html>

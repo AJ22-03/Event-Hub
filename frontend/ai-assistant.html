@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventGenie AI Concierge — EventHub</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Modular CSS Stylesheets -->
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/ai-assistant.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-logo">
+      <i class="fa-solid fa-tent"></i> EventHub
+    </a>
+    <div class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="nav-links" id="nav-menu">
+      <a href="index.html" class="nav-link">Home</a>
+      <a href="events.html" class="nav-link">Events</a>
+      <a href="quiz.html" class="nav-link">Quiz Arena <span class="nav-badge-new">NEW</span></a>
+      <a href="ai-assistant.html" class="nav-link active">AI Concierge <span class="nav-badge-new">AI</span></a>
+      <div id="nav-auth"></div>
+    </div>
+  </nav>
+
+  <!-- AI ASSISTANT LAYOUT -->
+  <main class="ai-page-layout">
+    
+    <!-- AI HEADER BANNER -->
+    <div class="ai-header-banner">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div style="width:48px; height:48px; border-radius:50%; background:var(--gradient); color:#1a080d; font-size:1.4rem; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(212,175,55,0.4);">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div>
+          <h2 style="font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--cream); margin-bottom:2px;">
+            EventGenie AI Concierge
+          </h2>
+          <p style="font-size:0.82rem; color:var(--muted-gold);">
+            Natural Language Event Recommender & Assistant
+          </p>
+        </div>
+      </div>
+      <div>
+        <span class="badge badge-success">
+          <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Online & Ready
+        </span>
+      </div>
+    </div>
+
+    <!-- CHAT INTERFACE WINDOW -->
+    <div class="ai-chat-window">
+      
+      <!-- Messages Scroll Area -->
+      <div class="ai-messages-area" id="ai-messages-area">
+        <!-- Rendered by js/ai-assistant.js -->
+      </div>
+
+      <!-- Quick Suggestion Prompt Chips -->
+      <div class="ai-suggestions-bar">
+        <span class="prompt-chip" onclick="sendPrompt('Show me free events')">
+          <i class="fa-solid fa-tag"></i> Free Events
+        </span>
+        <span class="prompt-chip" onclick="sendPrompt('Find music concerts in Mumbai')">
+          <i class="fa-solid fa-music"></i> Mumbai Music Fests
+        </span>
+        <span class="prompt-chip" onclick="sendPrompt('Events under ₹500')">
+          <i class="fa-solid fa-wallet"></i> Under ₹500
+        </span>
+        <span class="prompt-chip" onclick="sendPrompt('Recommend tech hackathons and summits')">
+          <i class="fa-solid fa-laptop-code"></i> Tech Summits
+        </span>
+        <span class="prompt-chip" onclick="sendPrompt('How can I win ticket discount vouchers with the quiz?')">
+          <i class="fa-solid fa-trophy"></i> Quiz Discounts
+        </span>
+      </div>
+
+      <!-- User Chat Input Form -->
+      <form class="ai-input-form" id="ai-chat-form">
+        <input 
+          type="text" 
+          id="ai-user-input" 
+          placeholder="Ask anything (e.g., 'What can I do this weekend in Bangalore under ₹1000?')..." 
+          autocomplete="off" 
+          required 
+        />
+        <button type="submit" id="btn-send-ai" title="Send Message">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-bottom">
+      &copy; 2026 EventHub. All rights reserved. Intelligent Event Discovery.
+    </div>
+  </footer>
+
+  <!-- Modular Interlinked JavaScript Files -->
+  <script src="js/app-core.js"></script>
+  <script src="js/ai-assistant.js"></script>
+</body>
+</html>
