@@ -1,0 +1,192 @@
+-- =============================================================================
+-- EventHub Database Schema (MySQL & SQLite Compatible)
+-- Project: EventHub — Smart Event Discovery, Booking & Live Engagement Platform
+-- Description: Complete Relational Schema with Constraints, Foreign Keys & Seed Data
+-- =============================================================================
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id VARCHAR(36) PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    mobile VARCHAR(20) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'user', -- 'admin', 'organizer', 'user'
+    avatar_url VARCHAR(255),
+    status VARCHAR(20) NOT NULL DEFAULT 'active', -- 'active', 'inactive', 'suspended'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS categories (
+    category_id VARCHAR(20) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    slug VARCHAR(50) NOT NULL UNIQUE,
+    icon VARCHAR(50) NOT NULL,
+    color_hex VARCHAR(10) NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS venues (
+    venue_id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    city VARCHAR(80) NOT NULL,
+    state VARCHAR(80),
+    postal_code VARCHAR(20),
+    latitude DECIMAL(10, 7) NOT NULL,
+    longitude DECIMAL(10, 7) NOT NULL,
+    capacity INT NOT NULL DEFAULT 500
+);
+
+CREATE TABLE IF NOT EXISTS events (
+    event_id VARCHAR(36) PRIMARY KEY,
+    title VARCHAR(180) NOT NULL,
+    category_id VARCHAR(20) NOT NULL,
+    organizer_id VARCHAR(36) NOT NULL,
+    venue_id VARCHAR(36) NOT NULL,
+    event_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    total_seats INT NOT NULL,
+    available_seats INT NOT NULL,
+    ticket_fee DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    banner_url VARCHAR(255),
+    description TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'approved', -- 'pending', 'approved', 'rejected', 'completed'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE RESTRICT,
+    FOREIGN KEY (organizer_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (venue_id) REFERENCES venues(venue_id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS registrations (
+    registration_id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    event_id VARCHAR(36) NOT NULL,
+    seats_count INT NOT NULL DEFAULT 1,
+    total_paid DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'pending', -- 'pending', 'paid', 'free', 'refunded'
+    payment_method VARCHAR(50),
+    transaction_ref VARCHAR(100),
+    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tickets (
+    ticket_id VARCHAR(36) PRIMARY KEY,
+    registration_id VARCHAR(36) NOT NULL,
+    ticket_code VARCHAR(50) NOT NULL UNIQUE,
+    qr_token VARCHAR(255) NOT NULL UNIQUE,
+    attendee_name VARCHAR(100) NOT NULL,
+    is_checked_in BOOLEAN DEFAULT FALSE,
+    check_in_time TIMESTAMP NULL,
+    FOREIGN KEY (registration_id) REFERENCES registrations(registration_id) ON DELETE CASCADE
+);
+
+-- =============================================================================
+-- Quiz & Engagement Module (Fulfilling Quiz SRS specifications)
+-- =============================================================================
+CREATE TABLE IF NOT EXISTS quiz_categories (
+    quiz_cat_id VARCHAR(20) PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT,
+    icon VARCHAR(50) NOT NULL DEFAULT 'fa-brain'
+);
+
+CREATE TABLE IF NOT EXISTS quiz_questions (
+    question_id VARCHAR(36) PRIMARY KEY,
+    quiz_cat_id VARCHAR(20) NOT NULL,
+    question_text TEXT NOT NULL,
+    option_a VARCHAR(255) NOT NULL,
+    option_b VARCHAR(255) NOT NULL,
+    option_c VARCHAR(255) NOT NULL,
+    option_d VARCHAR(255) NOT NULL,
+    correct_option CHAR(1) NOT NULL, -- 'A', 'B', 'C', 'D'
+    points INT DEFAULT 10,
+    explanation TEXT,
+    FOREIGN KEY (quiz_cat_id) REFERENCES quiz_categories(quiz_cat_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS quiz_attempts (
+    attempt_id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    quiz_cat_id VARCHAR(20) NOT NULL,
+    score INT NOT NULL,
+    total_questions INT NOT NULL,
+    percentage DECIMAL(5, 2) NOT NULL,
+    completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (quiz_cat_id) REFERENCES quiz_categories(quiz_cat_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+    notification_id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36) NOT NULL,
+    title VARCHAR(100) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(30) DEFAULT 'info', -- 'success', 'warning', 'info'
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- =============================================================================
+-- Seed Data / Sample Values
+-- =============================================================================
+
+INSERT INTO users (user_id, full_name, email, password_hash, mobile, role, status) VALUES
+('u1', 'System Administrator', 'admin@eventhub.com', 'admin123', '9000000001', 'admin', 'active'),
+('u2', 'Event Pro Productions', 'organizer@eventhub.com', 'org123', '9000000002', 'organizer', 'active'),
+('u3', 'John Doe', 'user@eventhub.com', 'user123', '9000000003', 'user', 'active')
+ON CONFLICT (user_id) DO NOTHING;
+
+INSERT INTO categories (category_id, name, slug, icon, color_hex, description) VALUES
+('cat_music', 'Music & Concerts', 'music', 'fa-music', '#B76E79', 'Live festivals, acoustic sets, EDM raves & classical recitals'),
+('cat_tech', 'Tech & Innovation', 'tech', 'fa-microchip', '#0EA5E9', 'Conferences, AI workshops, developer hackathons & summits'),
+('cat_sports', 'Sports & Fitness', 'sports', 'fa-person-running', '#10B981', 'Marathons, cricket leagues, yoga camps & fitness challenges'),
+('cat_food', 'Food & Culinary', 'food', 'fa-utensils', '#F59E0B', 'Food carnivals, gourmet tastings, wine pairing & chef masterclasses'),
+('cat_arts', 'Arts & Heritage', 'art', 'fa-palette', '#8B5CF6', 'Art exhibitions, theater dramas, heritage walks & poetry slams'),
+('cat_business', 'Business & Startups', 'business', 'fa-briefcase', '#D4AF37', 'Startup pitch fests, networking mixers & investor meetups')
+ON CONFLICT (category_id) DO NOTHING;
+
+INSERT INTO venues (venue_id, name, address, city, state, postal_code, latitude, longitude, capacity) VALUES
+('v1', 'DY Patil Sports Stadium', 'Sector 7, Nerul', 'Mumbai', 'Maharashtra', '400706', 19.0760000, 72.8777000, 2000),
+('v2', 'Bangalore International Exhibition Centre', '10th Mile, Tumkur Road', 'Bangalore', 'Karnataka', '560073', 12.9716000, 77.5946000, 500),
+('v3', 'Jawaharlal Nehru Stadium', 'Pragati Vihar', 'Delhi', 'Delhi', '110003', 28.6139000, 77.2090000, 3000),
+('v4', 'Marina Beach Grounds', 'Kamarajar Salai', 'Chennai', 'Tamil Nadu', '600005', 13.0827000, 80.2707000, 1000),
+('v5', 'Aga Khan Palace Heritage Grounds', 'Pune Nagar Road', 'Pune', 'Maharashtra', '411006', 18.5204000, 73.8567000, 300),
+('v6', 'HICC Convention Centre', 'Novotel, Hitec City', 'Hyderabad', 'Telangana', '500081', 17.3850000, 78.4867000, 800)
+ON CONFLICT (venue_id) DO NOTHING;
+
+INSERT INTO events (event_id, title, category_id, organizer_id, venue_id, event_date, start_time, end_time, total_seats, available_seats, ticket_fee, banner_url, description, status) VALUES
+('e1', 'Sunburn Arena Electronic Fest 2026', 'cat_music', 'u2', 'v1', '2026-10-15', '18:00:00', '23:00:00', 2000, 1450, 1500.00, '', 'Indias premier electronic music festival returns with international DJ headliners, immersive stage laser setups, and acoustic sound systems.', 'approved'),
+('e2', 'TechFest India & AI Summit 2026', 'cat_tech', 'u2', 'v2', '2026-10-22', '09:00:00', '18:00:00', 500, 210, 500.00, '', 'Premier South Asia tech conference featuring keynote sessions on generative AI, enterprise cloud engineering, quantum computing, and startup demos.', 'approved'),
+('e3', 'Delhi Grand Half Marathon 2026', 'cat_sports', 'u2', 'v3', '2026-11-05', '06:00:00', '12:00:00', 3000, 2800, 0.00, '', 'Scenic running course passing historical Delhi monuments with 5K, 10K, and 21K segments. Complete with timing chip, medals, and refreshments.', 'approved'),
+('e4', 'Coastal Spice & Culinary Carnival', 'cat_food', 'u2', 'v4', '2026-10-30', '11:00:00', '21:00:00', 1000, 680, 200.00, '', 'Celebrating over 70 authentic regional kitchens, live cooking showdowns by masterchefs, artisanal bakeries, and live band music.', 'approved'),
+('e5', 'Pune Contemporary Art Walk', 'cat_arts', 'u2', 'v5', '2026-11-12', '10:00:00', '17:00:00', 300, 120, 300.00, '', 'Open-air contemporary art showcase with live sculpting, curated masterclasses, water-color pavilion, and emerging indie art stalls.', 'approved'),
+('e6', 'Pan-India Startup Venture Summit', 'cat_business', 'u2', 'v6', '2026-11-20', '09:30:00', '17:30:00', 800, 800, 999.00, '', 'Over 200 angel investors and founders gather for live speed pitching, venture capital panels, and high-impact networking workshops.', 'approved')
+ON CONFLICT (event_id) DO NOTHING;
+
+INSERT INTO registrations (registration_id, user_id, event_id, seats_count, total_paid, payment_status, payment_method, transaction_ref) VALUES
+('r1', 'u3', 'e1', 1, 1500.00, 'paid', 'UPI / Card', 'TXN99182374'),
+('r2', 'u3', 'e3', 1, 0.00, 'free', 'Free Pass', 'FREE-PASS-003')
+ON CONFLICT (registration_id) DO NOTHING;
+
+INSERT INTO tickets (ticket_id, registration_id, ticket_code, qr_token, attendee_name) VALUES
+('t1', 'r1', 'EH-SUNB-9918', 'EH-QR-SUNB-9918-USER3', 'John Doe'),
+('t2', 'r2', 'EH-DELM-4401', 'EH-QR-DELM-4401-USER3', 'John Doe')
+ON CONFLICT (ticket_id) DO NOTHING;
+
+INSERT INTO quiz_categories (quiz_cat_id, title, description, icon) VALUES
+('quiz_tech', 'Tech & AI Trivia', 'Test your knowledge on Artificial Intelligence, Web Development, and Cloud Computing.', 'fa-microchip'),
+('quiz_music', 'Global Music & Beats', 'Identify iconic concerts, famous music festivals, instruments, and legendary artists.', 'fa-guitar'),
+('quiz_sports', 'Sports & Championship', 'Challenge your memory on marathons, world records, athletics, and stadium trivia.', 'fa-trophy')
+ON CONFLICT (quiz_cat_id) DO NOTHING;
+
+INSERT INTO quiz_questions (question_id, quiz_cat_id, question_text, option_a, option_b, option_c, option_d, correct_option, points, explanation) VALUES
+('q1', 'quiz_tech', 'Which JavaScript library is famous for lightweight, interactive web maps without mandatory API keys?', 'Google Maps API', 'Leaflet.js', 'Mapbox GL Commercial', 'Apple Maps Kit', 'B', 10, 'Leaflet.js is open-source, ultra-lightweight (~40KB), and free without requiring billing or API keys.'),
+('q2', 'quiz_tech', 'In web architecture, which protocol provides stateless communication between client and server?', 'FTP', 'SMTP', 'HTTP/HTTPS', 'SSH', 'C', 10, 'HTTP/HTTPS is the foundational protocol for distributed hypermedia systems on the web.'),
+('q3', 'quiz_tech', 'What data structure is typically used in Python to store key-value question pairs as described in the Quiz SRS?', 'Tuple', 'Set', 'Dictionary (dict)', 'FrozenSet', 'C', 10, 'Dictionaries store key-value mappings like question text, options list, and correct answer.'),
+('q4', 'quiz_music', 'Which Indian coastal state is world-famous for hosting Sunburn Festival?', 'Kerala', 'Goa', 'Maharashtra', 'Karnataka', 'B', 10, 'Sunburn originated on Vagator and Candolim beaches in Goa before expanding nationally.'),
+('q5', 'quiz_sports', 'What is the official standard distance of a full marathon race?', '21.0975 km', '42.195 km', '10.000 km', '50.000 km', 'B', 10, 'A full marathon is officially 42.195 kilometers (26.2 miles).')
+ON CONFLICT (question_id) DO NOTHING;
